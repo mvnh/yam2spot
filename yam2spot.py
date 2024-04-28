@@ -7,7 +7,6 @@ import time
 
 def ym_login_with_token(token):
     """Авторизация в Яндекс Музыке с помощью токена.
-    Требуется токен Яндекс Музыки.
     Способы получения токена указаны в README.md.
     Возвращает объект клиента Яндекс Музыки."""
 
@@ -35,9 +34,7 @@ def ym_get_liked_tracks(client):
     if like_tracks:
         while like_tracks:
             like_track = like_tracks.fetch_tracks()
-            print(
-                f"successful, {len(like_track)} liked tracks from Yandex Music, time taken: {time.time() - t1:.2f} seconds\n"
-            )
+            print(f"successful, {len(like_track)} liked tracks from Yandex Music, time taken: {time.time() - t1:.2f} seconds\n")
             return [f"{track.artists[0].name} - {track.title}" for track in like_track]
     else:
         print("failed\n")
@@ -134,9 +131,7 @@ def main():
     Парсит аргументы командной строки, такие как токены Яндекс Музыки и Spotify, имя пользователя Spotify и название плейлиста.
     Запускает авторизацию в Яндекс Музыке и Spotify, получение лайкнутых треков из Яндекс Музыки, создание плейлиста в Spotify и добавление треков в плейлист."""
 
-    parser = argparse.ArgumentParser(
-        description="Transfer liked tracks from Yandex Music to Spotify"
-    )
+    parser = argparse.ArgumentParser(description="Transfer liked tracks from Yandex Music to Spotify")
 
     parser.add_argument(
         "--ymtoken", 
