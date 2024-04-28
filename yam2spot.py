@@ -80,13 +80,14 @@ def sp_add_tracks(sp, playlist_id, tracks):
     for track in tracks:
         track = track.split(" - ")
         query = f"artist:{track[0]} track:{track[1]}"
-        result = sp.search(query, type="track")
-        if result["tracks"]["items"]:
-            sp.playlist_add_items(playlist_id, [result["tracks"]["items"][0]["uri"]])
-        else:
-            print(f"Failed to add {track[0]} - {track[1]} to Spotify playlist")
-        if TimeoutError:
-            pass
+        try:
+            result = sp.search(query, type="track")
+            if result["tracks"]["items"]:
+                sp.playlist_add_items(playlist_id, [result["tracks"]["items"][0]["uri"]])
+            else:
+                print(f"Failed to add {track[0]} - {track[1]} to Spotify playlist")
+        except TimeoutError as e:
+            print(f"Some error happened: {e}")
     print("Added liked tracks to Spotify playlist\n\nDone")
 
 
