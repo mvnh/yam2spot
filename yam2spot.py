@@ -91,17 +91,26 @@ def sp_add_tracks(sp, playlist_id, tracks):
     print("Adding liked tracks to Spotify playlist")
 
     t1 = time.time()
+    bunch = []
     for track in tracks:
         track = track.split(" - ")
         query = f"artist:{track[0]} track:{track[1]}"
         try:
             result = sp.search(query, type="track")
             if result["tracks"]["items"]:
-                sp.playlist_add_items(playlist_id, [result["tracks"]["items"][0]["uri"]])
+                if len(bunch) == 100: # 100 - максимальное количество треков, которое можно добавить в плейлист за один запрос. Не увеличивайте это число.
+                    sp.playlist_add_items(playlist_id, bunch)
+                    bunch.clear()
+                else:
+                    bunch.append(result["tracks"]["items"][0]["uri"])
             else:
                 print(f"Failed to add {track[0]} - {track[1]} to Spotify playlist. Time: {time.time() - t1:.2f} seconds")
         except TimeoutError as e:
             print(f"Failed to add {track[0]} - {track[1]} to Spotify playlist, {e} exception occured. Time: {time.time() - t1:.2f} seconds")
+    
+    if bunch:
+        sp.playlist_add_items(playlist_id, bunch)
+
     print(f"Added liked tracks to Spotify playlist, time taken: {time.time() - t1:.2f} seconds\n")
 
 
