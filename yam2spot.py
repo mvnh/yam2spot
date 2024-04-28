@@ -1,7 +1,7 @@
 import spotipy
 import yandex_music
 import argparse
-
+import time
 
 def ym_login_with_token(token):
     """Авторизация в Яндекс Музыке с помощью токена.
@@ -9,13 +9,15 @@ def ym_login_with_token(token):
     Способы получения токена указаны в README.md.
     Возвращает объект клиента Яндекс Музыки."""
 
-    print("Yandex Music authorization")
+    print("Yandex Music authorization: ", end='')
+
+    t1 = time.time()
     client = yandex_music.Client(token).init()
     if client:
-        print("Yandex Music authorization successful\n")
+        print(f"successful, time taken: {time.time() - t1:.2f} seconds\n")
         return client
     else:
-        print("Yandex Music authorization failed\n")
+        print("failed\n")
         return
 
 
@@ -24,15 +26,17 @@ def ym_get_liked_tracks(client):
     Принимает объект клиента Яндекс Музыки.
     Возвращает список треков в формате 'Исполнитель - Название трека'"""
 
-    print("Fetching liked tracks from Yandex Music")
+    print("Fetching liked tracks from Yandex Music: ", end='')
+
+    t1 = time.time()
     like_tracks = client.users_likes_tracks()
     if like_tracks:
         while like_tracks:
             like_track = like_tracks.fetch_tracks()
-            print(f"Fetched {len(like_track)} liked tracks from Yandex Music")
+            print(f"successful, {len(like_track)} liked tracks from Yandex Music, time taken: {time.time() - t1:.2f} seconds\n")
             return [f"{track.artists[0].name} - {track.title}" for track in like_track]
     else:
-        print("Failed to fetch liked tracks from Yandex Music\n")
+        print("failed\n")
         return
 
 
@@ -42,7 +46,7 @@ def sp_auth(username, client_id, client_secret):
     Инструкция по созданию приложения и получению client_id и client_secret указаны в README.md.
     Возвращает объект клиента Spotify."""
 
-    print("Spotify authorization")
+    print("Spotify authorization: ", end='')
     scope = "playlist-modify-public"
     return spotipy.Spotify(
         auth_manager=spotipy.SpotifyOAuth(
@@ -60,14 +64,22 @@ def sp_create_playlist(sp, username, playlist_name):
     Принимает объект клиента Spotify, имя пользователя Spotify и название плейлиста.
     Возвращает ID созданного плейлиста."""
 
-    print("Creating playlist in Spotify")
     user_id = sp.me()["id"]
+    if not user_id:
+        print("failed\n")
+        return
+    else:
+        print("successful\n")
+
+    print("Creating playlist in Spotify: ", end='')
+
+    t1 = time.time()
     playlist = sp.user_playlist_create(user_id, playlist_name)
     if playlist:
-        print("Created playlist in Spotify\n")
+        print(f"successful, time taken: {time.time() - t1:.2f} seconds\n")
         return playlist["id"]
     else:
-        print("Failed to create playlist in Spotify")
+        print("failed\n")
         return
 
 
@@ -77,17 +89,20 @@ def sp_add_tracks(sp, playlist_id, tracks):
     Логирует ошибки добавления треков в плейлист, если они возникли. Успешные добавления не логируются. Пропускает ошибки TimeoutError."""
 
     print("Adding liked tracks to Spotify playlist")
+
+    t1 = time.time()
     for track in tracks:
         track = track.split(" - ")
         query = f"artist:{track[0]} track:{track[1]}"
-        result = sp.search(query, type="track")
-        if result["tracks"]["items"]:
-            sp.playlist_add_items(playlist_id, [result["tracks"]["items"][0]["uri"]])
-        else:
-            print(f"Failed to add {track[0]} - {track[1]} to Spotify playlist")
-        if TimeoutError:
-            pass
-    print("Added liked tracks to Spotify playlist\n\nDone")
+        try:
+            result = sp.search(query, type="track")
+            if result["tracks"]["items"]:
+                sp.playlist_add_items(playlist_id, [result["tracks"]["items"][0]["uri"]])
+            else:
+                print(f"Failed to add {track[0]} - {track[1]} to Spotify playlist. Time: {time.time() - t1:.2f} seconds")
+        except TimeoutError as e:
+            print(f"Failed to add {track[0]} - {track[1]} to Spotify playlist, {e} exception occured. Time: {time.time() - t1:.2f} seconds")
+    print(f"Added liked tracks to Spotify playlist, time taken: {time.time() - t1:.2f} seconds\n")
 
 
 def main():
@@ -131,12 +146,15 @@ def main():
 
     print("\nStarting\n")
 
+    t1 = time.time()
+
     ym_client = ym_login_with_token(ym_token)
     tracks = ym_get_liked_tracks(ym_client)
     sp = sp_auth(sp_username, sp_client_id, sp_client_secret)
     playlist_id = sp_create_playlist(sp, sp_username, playlist_name)
     sp_add_tracks(sp, playlist_id, tracks)
 
+    print(f"Finished, total time taken: {time.time() - t1:.2f} seconds\n")
 
 if __name__ == "__main__":
     main()
