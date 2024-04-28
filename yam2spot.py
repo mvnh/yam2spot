@@ -54,8 +54,8 @@ def sp_auth(username, client_id, client_secret):
             client_secret=client_secret,
             redirect_uri="http://localhost:8888/callback",
             scope=scope,
-            username=username,
-        )
+            username=username
+        ), retries=5, requests_timeout=5
     )
 
 
@@ -86,7 +86,7 @@ def sp_create_playlist(sp, username, playlist_name):
 def sp_add_tracks(sp, playlist_id, tracks):
     """Добавление лайкнутых треков из Яндекс Музыки в Spotify.
     Принимает объект клиента Spotify, ID созданного в методе sp_create_playlist плейлиста Spotify и список треков из ym_get_liked_tracks.
-    Логирует ошибки добавления треков в плейлист, если они возникли. Успешные добавления не логируются. Пропускает ошибки TimeoutError."""
+    Логирует ошибки добавления треков в плейлист, если они возникли. Успешные добавления не логируются."""
 
     print("Adding liked tracks to Spotify playlist")
 
@@ -154,7 +154,7 @@ def main():
     playlist_id = sp_create_playlist(sp, sp_username, playlist_name)
     sp_add_tracks(sp, playlist_id, tracks)
 
-    print(f"Finished, total time taken: {time.time() - t1:.2f} seconds\n")
+    print(f"Finished, total time taken: {time.time() - t1:.2f} seconds")
 
 if __name__ == "__main__":
     main()
