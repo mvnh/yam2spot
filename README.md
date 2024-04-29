@@ -19,7 +19,7 @@ pip3 install -r requirements.txt
 ## Использование
 1. Получите токен вашего аккаунта в Яндекс Музыке
 1. В настройках созданного OAuth приложения скопируйте **Client ID** и **Client secret**
-2. Подставьте полученные значения в следующую команду:
+2. Запустите следующую команду в командной строке, предварительно подставив полученные значения:
 ```bash
 py -m yam2spot --ymtoken <yandex_music_token> --spclientid <spotify_client_id> --spclientsecret <client_secret_spotify> --spusername <spotify_account_username> --playlistname <название_плейлиста>
 ```
